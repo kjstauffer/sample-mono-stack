@@ -1,0 +1,14 @@
+#!/bin/sh
+
+##
+ # This should be run from the root of this package via: yarn gqlCodegen
+ #
+ # Running it directly may not resolve paths properly.
+##
+
+GQL_GEN_BIN=`yarn bin graphql-codegen-esm`
+GQL_FILE="codegen.ts"
+
+echo "--> Running the Codegen..."
+
+eval "NODE_OPTIONS='--loader ts-node/esm' $GQL_GEN_BIN --verbose -c $GQL_FILE"

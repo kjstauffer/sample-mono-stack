@@ -1,0 +1,30 @@
+#!/bin/sh
+
+##
+# Run Jest test with all services running on localhost.
+##
+
+# Exit if any command fails.
+set -e
+
+# grep -v grep doesn't seem to work when running `yarn jest`
+# RUNNING=`ps aux | grep -v grep | grep -ci mysqld`
+
+# Get the total number of processes matching `mysqld` (including this grep command)
+RUNNING=`ps aux | grep -ci mysqld`
+
+# RUNNING will always be at least 1 due to the initial grep being returned as a process.
+# So if RUNNING > 1, then there is a mysql service running.
+if [ $RUNNING -gt 1 ]
+then
+  echo "\nLooks like mysql is running locally. Stop the local (non-docker) mysql service to continue.\n"
+  exit 1
+fi
+
+# Use git to find the project root
+PROJECT_ROOT=`git rev-parse --show-toplevel`
+
+# Get the full path to the jest binary. Needed to bypass the "jest" script in package.json
+JEST_BIN=`yarn bin jest`
+
+NODE_OPTIONS="--experimental-vm-modules" $JEST_BIN "$@"

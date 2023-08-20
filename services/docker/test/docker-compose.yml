@@ -1,0 +1,36 @@
+services:
+  nodejs:
+    build:
+      context: ${PWD}
+      dockerfile: services/docker/Dockerfile
+      target: test
+    volumes:
+      - yarn-cache:/yarn-cache
+      - coverage:/app/coverage
+      - ci-cache:/app/.ci-cache
+    environment:
+      CI: 1
+    depends_on:
+      - redis
+      - mysql
+    command: yarn test
+
+  mysql:
+    image: mysql:8.1.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    command: --log_error_verbosity 1
+
+  redis:
+    image: redis:5
+
+volumes:
+  yarn-cache:
+  coverage:
+  ci-cache:
+  mysql_data:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

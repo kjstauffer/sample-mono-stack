@@ -1,0 +1,9 @@
+#!/bin/sh
+
+##
+# Run a TypeScript source file from the command line
+##
+
+TS_NODE_BIN=`yarn bin ts-node-esm`
+
+$TS_NODE_BIN -r tsconfig-paths/register --transpile-only "$@"

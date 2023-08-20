@@ -1,0 +1,6 @@
+**/build/**/*
+**/dist/**/*
+**/locale/**/*
+**/__unused_code/**/*
+**/config/*.cjs
+*.cjs

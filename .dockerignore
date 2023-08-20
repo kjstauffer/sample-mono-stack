@@ -1,0 +1,11 @@
+.git
+node_modules
+coverage
+.ci-cache
+packages/**/node_modules
+packages/**/build
+untracked
+logs
+yarn-error.log
+.vscode
+.DS_Store

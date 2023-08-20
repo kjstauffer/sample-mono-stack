@@ -1,0 +1,31 @@
+#!/bin/sh
+
+##
+# Script to startup any server in its various modes. The "script" name suffix within
+# package.json is used to determine the mode:
+#   *:dev   = Development mode within Docker.
+#   *:prod  = Production mode within Docker/k8s.
+##
+
+SCRIPT_NAME=$npm_lifecycle_event
+
+NODEMON_BIN=`yarn bin nodemon`
+TS_NODE_BIN=`yarn bin ts-node`
+
+echo $NODEMON_BIN
+echo $TS_NODE_BIN
+
+case $SCRIPT_NAME in
+  *:dev)
+    export NODE_ENV=development
+    $NODEMON_BIN --signal SIGHUP --exec $TS_NODE_BIN --esm --transpile-only --log-error "$1"
+    ;;
+
+  *:prod)
+    export NODE_ENV=production
+    $TS_NODE_BIN --esm --transpile-only --log-error "$1"
+    ;;
+
+  *)
+    echo "Error: script name must end with :dev, or :prod"
+esac

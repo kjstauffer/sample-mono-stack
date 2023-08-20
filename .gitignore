@@ -1,0 +1,28 @@
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-error.log
+node_modules/
+*.env
+logs/
+coverage/
+packages/*/*/build/
+config/local.cjs
+config/local-*.cjs
+config/local.ts
+config/local-*.ts
+.DS_Store
+untracked/
+.eslintcache
+packages/**/.eslintcache
+
+# Keep environment variables out of version control
+packages/**/.env
+
+# Swap the comments on the following lines if you don't wish to use zero-installs
+# Documentation here: https://yarnpkg.com/features/zero-installs
+!.yarn/cache
+#.pnp.*

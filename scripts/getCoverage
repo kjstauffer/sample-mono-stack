@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Get the coverge reports from the docker volume after tests have run.
+# IMPORTANT: run the tests first.
+
+# exit if any command fails
+set -e
+
+# Clear out any old coverage reports
+rm -rf coverage
+
+# Create a temporary container with the volume mounted
+docker container create --name getCoverage -v sample-mono-stack-tests_test-coverage:/coverage hello-world > /dev/null
+
+# Copy the coverage directory from the container
+docker cp getCoverage:/coverage ./
+
+# Delete the temporary container
+docker rm getCoverage > /dev/null
+
+echo "\nSuccess. Coverage is in the 'coverage' directory\n"

@@ -1,0 +1,90 @@
+services:
+  # Build the base image needed for all Node services below. The shared settings AND all Node
+  # services below need to depend on this to ensure everything starts up in the correct order.
+  # See https://github.com/compose-spec/compose-spec/blob/master/build.md for info about building an image.
+  build_base_image:
+    image: base_image
+    build:
+      context: ${PWD}
+      dockerfile: services/docker/Dockerfile
+      target: dev
+    volumes:
+      - yarn-cache:/yarn-cache
+
+  # The shared settings used by all Node services below.
+  shared_settings: &shared_settings
+    image: base_image
+    volumes:
+      # The volumes mounted here should just be the directories that need to be in sync with
+      # the containers while running. Other more "static" files in the project are copied over
+      # in the Dockerfile.
+      - ${PWD}/config:/app/config:cached
+      - ${PWD}/packages:/app/packages:cached
+      - ${PWD}/scripts:/app/scripts:cached
+      - ${PWD}/logs:/app/logs:cached
+    depends_on:
+      - build_base_image
+
+  # reverseproxy:
+  #   image: nginx:1.25-alpine
+  #   volumes:
+  #     - ${PWD}:/app:cached
+  #     - ${PWD}/services/reverseproxy/development/nginx.conf:/etc/nginx/nginx.conf:cached
+  #     - ${PWD}/services/reverseproxy/development/tls:/etc/nginx/tls:cached
+  #   ports:
+  #     - '443:443'
+  #   depends_on:
+  #     - build_base_image
+  #     - client-frontend
+  #   restart: always
+
+  # client-frontend:
+  #   <<: *shared_settings
+  #   command: yarn start-client-frontend:dev
+  #   depends_on:
+  #     - build_base_image
+  #   restart: always
+
+  server-frontend:
+    <<: *shared_settings
+    environment:
+      - DEBUG="prisma*"
+    #   - NODE_EXTRA_CA_CERTS=/app/scripts/tls/sampleMonoStack-rootCA.pem
+    command: yarn start-server-frontend:dev
+    ports:
+      # Export the port to enable running graphql codegen tools locally.
+      # Needs to match the port set in the default config (config/default.ts).
+      - '3000:3000'
+    depends_on:
+      - build_base_image
+      - mysql
+    restart: always
+
+  # This MySQL service is ONLY used for testing purposes. No actual data is stored here.
+  mysql:
+    image: mysql:8.1.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sample
+    command: --log_error_verbosity 1
+    ports:
+      - 3306:3306
+    restart: always
+
+  redis:
+    image: redis:5
+    ports:
+      - 6379:6379
+    sysctls:
+      - net.core.somaxconn=1024
+
+# Persistent volume within docker.
+volumes:
+  yarn-cache:
+  mysql_data:
+    # In memory volume for MySQL since it is only use for testing.
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

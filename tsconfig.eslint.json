@@ -1,0 +1,21 @@
+{
+  /**
+   * This file is used by ESLint to know what files at the root of the project
+   * should be linted by the typescript-eslint parser.
+   */
+  "extends": "./tsconfig.json",
+  "include": [
+    /* Pick up the JS config files for linting. */
+    "*.cjs",
+    /* Pick up any scripts for linting. */
+    "./scripts/**/*.js",
+    "./scripts/**/*.ts",
+    /* Pick up any services for linting. */
+    "./services/**/*.js",
+    /* Pick up any testing JS files for linting. */
+    "./testing/**/*.js",
+    /* From here down, the list should match `tsconfig.json` */
+    "./config/ts/**/*.ts",
+    "./testing/**/*.ts"
+  ],
+}

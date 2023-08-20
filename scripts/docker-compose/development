@@ -1,0 +1,21 @@
+#!/bin/sh
+
+BASE_CMD="docker compose -p sample-mono-stack -f services/docker/development/docker-compose.yml";
+
+if [ "$1" = "up" ];
+then
+  $BASE_CMD up --build -d
+  exit 0;
+fi
+
+if [ "$1" = "down" ];
+then
+  $BASE_CMD down --remove-orphans
+  exit 0;
+fi
+
+if [ "$1" = "tail" ];
+then
+  $BASE_CMD logs -f
+  exit 0;
+fi

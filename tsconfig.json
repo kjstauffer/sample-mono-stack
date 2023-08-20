@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "sourceMap": true,
+    "removeComments": true,
+    "strict": true,
+    "pretty": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "allowUnreachableCode": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    // "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "lib": ["es6", "dom", "ESNext"],
+    "types": ["node", "jest"],
+  },
+  /**
+   * Required to avoid the following error:
+   * error TS5095: Option 'bundler' can only be used when 'module' is set to 'es2015' or later
+   */
+  "ts-node": {
+    "compilerOptions": {
+      "module": "ESNext",
+      "moduleResolution": "Node"
+    }
+  }
+}
