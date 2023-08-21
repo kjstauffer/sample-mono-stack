@@ -1,6 +1,6 @@
 # Sample Monolith Stack
 
-This repo contains a sample setup for a monolith stack for a `development` environment in ESM (CommonJS is used only for the config files, for now). This setup could also be extended to support other environments for deployment (e.g. `staging` and `production`).
+This repo contains a sample setup, including authentication, for a monolith stack for a `development` environment in ESM (CommonJS is used only for the config files, for now). This setup could also be extended to support other environments for deployment (e.g. `staging` and `production`).
 
 ## Notes
 
