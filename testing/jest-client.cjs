@@ -19,6 +19,6 @@ module.exports = {
   roots: [`<rootDir>/src`],
   testRegex: `(/__tests__/.*\\.(spec|test))\\.tsx?$`,
   testEnvironment: `jsdom`,
-  setupFilesAfterEnv: [`@testing-library/jest-dom`],
-  // setupFilesAfterEnv: [`@testing-library/jest-dom`, `<rootDir>/../../../testing/immerSetup.ts`],
+  // setupFilesAfterEnv: [`@testing-library/jest-dom`],
+  setupFilesAfterEnv: [`@testing-library/jest-dom`, `<rootDir>/../../../testing/immerSetup.ts`],
 };

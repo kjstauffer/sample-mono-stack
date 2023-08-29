@@ -1,0 +1,18 @@
+{
+  /**
+   * This file is used by ESLint to know what file globs in this package should be linted
+   * by the typescript-eslint parser.
+   *
+   * Any additions to the file globs here should also be added to the `lint` command
+   * in the `package.json` file.
+   */
+  "extends": "./tsconfig.json",
+  "include": [
+    ".eslintrc*.cjs",
+    /* Pick up the JS config files for linting. */
+    "*.cjs",
+    /* From here down, the list should match `tsconfig.json` */
+    "src/**/*",
+    "scripts/**/*"
+  ]
+}

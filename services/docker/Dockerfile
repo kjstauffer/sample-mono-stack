@@ -8,7 +8,7 @@ WORKDIR /app
 # This takes advantage of cached Docker layers.
 COPY package.json yarn.lock .yarnrc.yml /app/
 COPY .yarn /app/.yarn
-# COPY packages/client/frontend/package.json /app/packages/client/frontend/package.json
+COPY packages/client/frontend/package.json /app/packages/client/frontend/package.json
 COPY packages/server/frontend/prisma /app/packages/server/frontend/prisma
 COPY packages/server/frontend/.env /app/packages/server/frontend/.env
 COPY packages/server/frontend/package.json /app/packages/server/frontend/package.json

@@ -40,7 +40,7 @@ module.exports = {
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   projects: [
-    // `packages/client/frontend/jest.config.cjs`,
+    `packages/client/frontend/jest.config.cjs`,
     `packages/server/frontend/jest.config.cjs`,
   ],
   watchPlugins: [
