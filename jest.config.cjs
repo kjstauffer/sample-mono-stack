@@ -7,7 +7,7 @@ module.exports = {
   //   '^.+\\.(j|t)sx?$': `babel-jest`,
   // },
   transform: {},
-  // resetMocks: true,
+  resetMocks: true,
   moduleFileExtensions: [
     `ts`,
     `tsx`,

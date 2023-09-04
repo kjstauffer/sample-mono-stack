@@ -1,6 +1,6 @@
 /**
  * The core URL paths used throughout the entire system. This should not be an exhaustive list of
- * ALL URL paths possible. Rather just the main entry points in to various parts of the system
+ * ALL URL paths possible. Rather just the main entry points into various parts of the system
  * that will need to be linked to from various parts of the system.
  *
  * No trailing slashes on any paths.
@@ -14,8 +14,8 @@ const URL_PATHS = {
   admin: {
     root: `/admin`,
   },
-} as const;
+}
 
-export type UrlPaths = typeof URL_PATHS;
-
-export { URL_PATHS };
+module.exports = {
+  URL_PATHS,
+};

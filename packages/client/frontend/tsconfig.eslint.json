@@ -8,6 +8,7 @@
    */
   "extends": "./tsconfig.json",
   "include": [
+    "codegen.ts",
     ".eslintrc*.cjs",
     /* Pick up the JS config files for linting. */
     "*.cjs",

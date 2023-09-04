@@ -95,7 +95,11 @@ const setupContext: SetupContext = async ({ req, res }): Promise<ApiServerContex
   }
 
   /* A user has not been authenticated. Throw an error instead of proceeding to a resolver. */
-  throw new GraphQLError(`Not Allowed`);
+  throw new GraphQLError(`notAllowed`, {
+    extensions: {
+      http: { status: 200 },
+    },
+  });
 };
 
 /**
@@ -198,6 +202,23 @@ app.use(express.urlencoded({ limit: `50mb`, extended: true }));
 app.post(`/auth`, asyncRoute(authRoute));
 app.use(handleAuthErrors);
 
+// const errorPlugin: ApolloServerPlugin = {
+//   // eslint-disable-next-line @typescript-eslint/require-await
+//   async requestDidStart() {
+//     return {
+//       didEncounterErrors({ errors, contextValue }) {
+//         if (errors.length > 0) {
+//           for (const error of errors) {
+//             // await logApolloError({ error, context });
+//           }
+//         }
+
+//         return Promise.resolve();
+//       },
+//     };
+//   },
+// };
+
 const apolloServer = async () => {
   const plugins = [
     ApolloServerPluginCacheControl({
@@ -205,24 +226,7 @@ const apolloServer = async () => {
       calculateHttpHeaders: false,
     }),
     /* Handle logging errors during the request. */
-    // {
-    //   // eslint-disable-next-line @typescript-eslint/require-await
-    //   async requestDidStart() {
-    //     return {
-    //       async didEncounterErrors({
-    //         errors,
-    //         context,
-    //       }: GraphQLRequestContextDidEncounterErrors<ApiServerContext>) {
-    //         if (errors.length > 0) {
-    //           for (const error of errors) {
-    //             // eslint-disable-next-line no-await-in-loop
-    //             // await logApolloError({ error, context });
-    //           }
-    //         }
-    //       },
-    //     };
-    //   },
-    // },
+    // errorPlugin,
   ];
 
   /* Disable the Apollo landing page for all environments that are not dev. */

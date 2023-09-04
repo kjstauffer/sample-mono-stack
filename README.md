@@ -143,6 +143,13 @@ Since this is for a development environment, it's probably best to run it locall
   yarn prisma migrate dev
   ```
 
+- Install yarn's `plugin-workspace-tools`
+
+  ```sh
+  # This makes the `yarn workspaces foreach` command available for use in `package.json`.
+  yarn plugin import @yarnpkg/plugin-workspace-tools
+  ```
+
 ## Running
 
 - Start `server-frontend`. This starts the server that controls the REST & GraphQL API endpoints.

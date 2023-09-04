@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-var-requires */
-
-const jestConfig = require(`../../../testing/jest-client`);
-const { URL_PATHS } = require(`~client-frontend/static/urlPaths`);
+const jestConfig = require(`../../../testing/jest-client.cjs`);
+const { URL_PATHS } = require(`./src/static/urlPaths.cjs`);
+const babelConfig = require(`../../../babel.config.cjs`)({
+  env: () => { return `test`},
+});
 
 module.exports = {
   ...jestConfig,
@@ -11,15 +11,27 @@ module.exports = {
     URL_PATHS,
   },
   displayName: `c:frontend`,
-  setupFiles: [`<rootDir>/src/testing/setup.ts`],
-  // moduleNameMapper: {
-  //   '\\.(css|less)$': `<rootDir>/__mocks__/styleMock.js`,
-  // },
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
+  // setupFiles: [`<rootDir>/src/testing/setup.ts`],
+  transformIgnorePatterns: [`node_modules/(?!(~.+)/)`],
   transform: {
-    '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.jest.json', useESM: true }],
     '^.+\\.cjs$': `babel-jest`,
-  },
+		/* Transform jsx & tsx files to CommonJS using babel. */
+		'\\.[jt]sx?$': [
+			'babel-jest',
+			{
+				presets: babelConfig.presets.map(preset => {
+					if (Array.isArray(preset) && preset[0] === "@babel/preset-env") {
+						return [
+							"@babel/preset-env",
+							{
+								...preset[1],
+								modules: "commonjs",
+							}
+						]
+					}
+					return preset;
+				}),
+			},
+		],
+	},
 };

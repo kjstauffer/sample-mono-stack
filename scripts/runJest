@@ -27,4 +27,4 @@ PROJECT_ROOT=`git rev-parse --show-toplevel`
 # Get the full path to the jest binary. Needed to bypass the "jest" script in package.json
 JEST_BIN=`yarn bin jest`
 
-NODE_OPTIONS="--experimental-vm-modules" $JEST_BIN "$@"
+NODE_OPTIONS="--experimental-vm-modules" NODE_NO_WARNINGS=1 $JEST_BIN "$@"

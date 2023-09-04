@@ -1,10 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-
 /**
  * These ENV settings are needed for the project config to get loaded properly.
  * An alternate tsconfig is needed to get commonjs from the config files.
@@ -18,7 +11,6 @@ const { WebpackManifestPlugin } = require(`webpack-manifest-plugin`);
 const ForkTsCheckerWebpackPlugin = require(`fork-ts-checker-webpack-plugin`);
 const { BundleAnalyzerPlugin } = require(`webpack-bundle-analyzer`);
 const HtmlWebpackPlugin = require(`html-webpack-plugin`);
-// const ScriptExtHtmlWebpackPlugin = require(`script-ext-html-webpack-plugin`);
 const WorkboxPlugin = require(`workbox-webpack-plugin`);
 const CopyWebpackPlugin = require(`copy-webpack-plugin`);
 const WorkerPlugin = require(`worker-plugin`);
@@ -31,16 +23,16 @@ const configObject = config.util.toObject();
  * Any values in the `./config` that should be kept private should have their
  * keys removed from `configObject`.
  */
-// delete configObject.someSecretKey;
+delete configObject.apiAuthKey;
 
-const { URL_PATHS } = require(`./src/static/urlPaths`);
+const { URL_PATHS } = require(`./src/static/urlPaths.cjs`);
 
 module.exports = (env, argv) => {
   const module = {
     entry: `./src/index`,
     node: false,
     resolve: {
-      extensions: [`.ts`, `.tsx`, `.js`],
+      extensions: [`.ts`, `.tsx`, `.js`, `.cjs`],
     },
     stats: `errors-only`,
     module: {
@@ -65,7 +57,7 @@ module.exports = (env, argv) => {
             {
               loader: `babel-loader`,
               options: {
-                configFile: `../../../babel.config.js`,
+                configFile: `../../../babel.config.cjs`,
                 envName: env.production ? `production` : `development`,
               },
             },
@@ -103,10 +95,6 @@ module.exports = (env, argv) => {
     new HtmlWebpackPlugin({
       template: `public/index.html`,
     }),
-    // new ScriptExtHtmlWebpackPlugin({
-    //   /* Add `type="module"` to JS files included in index.html (all of them start with `main`) */
-    //   module: `main`,
-    // }),
     new WorkerPlugin(),
   ];
 
@@ -121,22 +109,20 @@ module.exports = (env, argv) => {
     module.devtool = `source-map`;
 
     const domain = config.get(`domain`);
+
     module.devServer = {
       allowedHosts: `all`,
       historyApiFallback: true,
       hot: true,
       host: `0.0.0.0`,
       port: 5000,
+      webSocketServer: false,
       client: {
         overlay: {
           warnings: true,
           errors: true,
         },
-        webSocketURL: `auto://frontend.${domain}`,
       },
-      // devMiddleware: {
-      //   publicPath: `/`,
-      // },
     };
 
     plugins.push(

@@ -18,6 +18,7 @@ config/local-*.ts
 untracked/
 .eslintcache
 packages/**/.eslintcache
+scripts/tls/*
 
 # Keep environment variables out of version control
 packages/**/.env

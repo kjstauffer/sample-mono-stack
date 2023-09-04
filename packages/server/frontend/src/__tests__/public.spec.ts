@@ -176,14 +176,14 @@ describe(`Error Tests`, () => {
 
     await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
       expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/Not Allowed/);
+      expect(errors[0].message).toMatch(/notAllowed/);
     });
   });
 
   test(`Get authenticated user with a missing session`, async () => {
     await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
       expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/Not Allowed/);
+      expect(errors[0].message).toMatch(/notAllowed/);
     });
   });
 
@@ -198,7 +198,7 @@ describe(`Error Tests`, () => {
 
     await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
       expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/Not Allowed/);
+      expect(errors[0].message).toMatch(/notAllowed/);
     });
   });
 
@@ -210,7 +210,7 @@ describe(`Error Tests`, () => {
       .set(`gql-codegen-key`, `invalid-key`)
       .then(({ body: { errors } }: Response) => {
         expect(errors).toHaveLength(1);
-        expect(errors[0].message).toMatch(/Not Allowed/);
+        expect(errors[0].message).toMatch(/notAllowed/);
       });
   });
 

@@ -13,9 +13,7 @@ module.exports = {
       `error`,
       {
         groups: [`builtin`, `external`, `internal`, `parent`, `sibling`, `index`],
-        /* Broken: don't know why */
-        // 'newlines-between': `always`,
-        'newlines-between': `always-and-inside-groups`,
+        'newlines-between': `always`,
         pathGroups: [
           {
             pattern: `~server-frontend/**`,

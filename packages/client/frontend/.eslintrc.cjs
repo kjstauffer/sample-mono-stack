@@ -1,5 +1,5 @@
 module.exports = {
-  extends: `../../../.eslintrc.js`,
+  extends: `../../../.eslintrc.cjs`,
   parserOptions: {
     project: `./tsconfig.eslint.json`,
     tsconfigRootDir: __dirname,
@@ -7,15 +7,13 @@ module.exports = {
   rules: {
     /**
      * With the exception of the pattern in the first group, this rule is identical across all
-     * packages.  If changes are made here, make sure they are also made everywhere else.
+     * packages. If changes are made here, make sure they are also made everywhere else.
      */
     'import/order': [
       `error`,
       {
         groups: [`builtin`, `external`, `internal`, `parent`, `sibling`, `index`],
-        /* Broken: don't know why */
-        // 'newlines-between': `always`,
-        'newlines-between': `always-and-inside-groups`,
+        'newlines-between': `always`,
         pathGroups: [
           {
             pattern: `~client-frontend/**`,
@@ -31,5 +29,4 @@ module.exports = {
       },
     ],
   },
-  ignorePatterns: [`src/editorjs/blocks/**/*`],
 };

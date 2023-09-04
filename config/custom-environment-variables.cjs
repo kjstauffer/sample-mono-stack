@@ -10,7 +10,8 @@
  *  - `delete configObject.keyToBeDeleted;`
  */
 
-// const customEnvVars = {
-// };
+const customEnvVars = {
+  apiAuthKey: `API_AUTH_KEY`,
+};
 
-// export default customEnvVars;
+module.exports = customEnvVars;

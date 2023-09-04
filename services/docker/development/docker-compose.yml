@@ -25,31 +25,31 @@ services:
     depends_on:
       - build_base_image
 
-  # reverseproxy:
-  #   image: nginx:1.25-alpine
-  #   volumes:
-  #     - ${PWD}:/app:cached
-  #     - ${PWD}/services/reverseproxy/development/nginx.conf:/etc/nginx/nginx.conf:cached
-  #     - ${PWD}/services/reverseproxy/development/tls:/etc/nginx/tls:cached
-  #   ports:
-  #     - '443:443'
-  #   depends_on:
-  #     - build_base_image
-  #     - client-frontend
-  #   restart: always
+  reverseproxy:
+    image: nginx:1.25-alpine
+    volumes:
+      - ${PWD}:/app:cached
+      - ${PWD}/services/reverseproxy/development/nginx.conf:/etc/nginx/nginx.conf:cached
+      - ${PWD}/services/reverseproxy/development/tls:/etc/nginx/tls:cached
+    ports:
+      - '443:443'
+    depends_on:
+      - build_base_image
+      - client-frontend
+    restart: always
 
-  # client-frontend:
-  #   <<: *shared_settings
-  #   command: yarn start-client-frontend:dev
-  #   depends_on:
-  #     - build_base_image
-  #   restart: always
+  client-frontend:
+    <<: *shared_settings
+    command: yarn start-client-frontend:dev
+    depends_on:
+      - build_base_image
+    restart: always
 
   server-frontend:
     <<: *shared_settings
     environment:
       - DEBUG="prisma*"
-    #   - NODE_EXTRA_CA_CERTS=/app/scripts/tls/sampleMonoStack-rootCA.pem
+      - NODE_EXTRA_CA_CERTS=/app/scripts/tls/sample-rootCA.pem
     command: yarn start-server-frontend:dev
     ports:
       # Export the port to enable running graphql codegen tools locally.

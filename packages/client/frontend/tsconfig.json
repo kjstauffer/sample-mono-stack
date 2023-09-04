@@ -5,12 +5,18 @@
       /* Not merged with root tsconfig... Must include full list */
       "node",
       "jest",
-      "@types/testing-library__jest-dom",
+      "@testing-library/jest-dom",
     ]
   },
   "include": [
     /* Any additions to this list need to also go into `tsconfig.eslint.json` */
+    "codegen.ts",
     "src/**/*",
     "scripts/**/*"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

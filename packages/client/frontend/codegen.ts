@@ -16,13 +16,15 @@ const config: CodegenConfig = {
   },
   generates: {
     './src/graphql/generatedComponents.tsx': {
-      schema: [{
-        'http://localhost:3000/': {
-          headers: {
-            'gql-codegen-key': process.env.GQL_CODEGEN_KEY,
+      schema: [
+        {
+          'http://localhost:3000/': {
+            headers: {
+              'gql-codegen-key': process.env.GQL_CODEGEN_KEY ?? ``,
+            },
           },
         },
-      }],
+      ],
       documents: `src/**/*.graphql`,
       plugins: [
         {
@@ -46,13 +48,15 @@ const config: CodegenConfig = {
       ],
     },
     './src/graphql/generatedFragmentMatcher.ts': {
-      schema: [{
-        'http://localhost:3000/': {
-          headers: {
-            'gql-codegen-key': process.env.GQL_CODEGEN_KEY,
+      schema: [
+        {
+          'http://localhost:3000/': {
+            headers: {
+              'gql-codegen-key': process.env.GQL_CODEGEN_KEY ?? ``,
+            },
           },
         },
-      }],
+      ],
       plugins: [
         {
           add: {
@@ -73,7 +77,6 @@ const config: CodegenConfig = {
       ],
     },
   },
-  // require: [`ts-node/esm`, `ts-node/register`],
 };
 
 // eslint-disable-next-line import/no-default-export
