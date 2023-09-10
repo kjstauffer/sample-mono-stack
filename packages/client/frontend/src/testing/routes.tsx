@@ -8,6 +8,7 @@ import type { User } from '../graphql/generatedComponents';
 import { RootErrorBoundary } from '../RootErrorBoundary';
 import { BaselineStyle } from '../StyleWrapper';
 import { App } from '../App';
+import { AppContextProvider } from '../AppContext';
 
 import { setMatchMedia, type MediaWidth } from './media';
 import { getAuthenticatedUserMock, getMockUser, getUnauthenticatedUserMock } from './mocks';
@@ -57,7 +58,9 @@ const renderRoute = ({ route, gqlMocks = [], options, mediaWidth = `lg` }: Rende
         <MockedProvider mocks={allGqlMocks} cache={cache}>
           <MemoryRouter initialEntries={[route]}>
             <BaselineStyle>
-              <App />
+              <AppContextProvider>
+                <App />
+              </AppContextProvider>
             </BaselineStyle>
           </MemoryRouter>
         </MockedProvider>

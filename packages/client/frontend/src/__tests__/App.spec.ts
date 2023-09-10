@@ -4,8 +4,9 @@ import {
   renderAuthenticatedRoute,
   renderException,
 } from '../testing/routes';
+import { mockFetch } from '../testing/mocks';
 
-const route = URL_PATHS.admin.root;
+const route = `/`;
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -26,10 +27,55 @@ describe(`Error tests`, () => {
   });
 
   test(`Unauthenticated user`, async () => {
+    const fetchFn = mockFetch({
+      data: { error: `unauthorized` },
+      ok: false,
+    });
+    window.fetch = fetchFn;
+
     renderUnauthenticatedRoute({ route });
 
     await screen.findByLabelText(`Username:`);
     await screen.findByLabelText(`Password:`);
+
+    await userEvent.click(await screen.findByText(`Sign In`));
+
+    await screen.findByText(`Invalid Credentials`);
+  });
+
+  test(`Malformed response`, async () => {
+    const fetchFn = mockFetch({
+      data: { error: `unauthorized` },
+      ok: true,
+      rejectJson: true,
+    });
+    window.fetch = fetchFn;
+
+    renderUnauthenticatedRoute({ route });
+
+    await screen.findByLabelText(`Username:`);
+    await screen.findByLabelText(`Password:`);
+
+    await userEvent.click(await screen.findByText(`Sign In`));
+
+    await screen.findByText(`Invalid Credentials`);
+  });
+
+  test(`Malformed error`, async () => {
+    const fetchFn = mockFetch({
+      data: { notAnError: `malformedError` },
+      ok: false,
+    });
+    window.fetch = fetchFn;
+
+    renderUnauthenticatedRoute({ route });
+
+    await screen.findByLabelText(`Username:`);
+    await screen.findByLabelText(`Password:`);
+
+    await userEvent.click(await screen.findByText(`Sign In`));
+
+    await screen.findByText(`Invalid Credentials`);
   });
 });
 
@@ -46,6 +92,11 @@ describe(`Success tests`, () => {
   });
 
   test(`Authenticate user`, async () => {
+    const fetchFn = mockFetch({
+      data: { user: { id: 1, name: `validUser` } },
+    });
+    window.fetch = fetchFn;
+
     renderUnauthenticatedRoute({ route });
 
     await userEvent.type(await screen.findByLabelText(`Username:`), `sampleUsername`);

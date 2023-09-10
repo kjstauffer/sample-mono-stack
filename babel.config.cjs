@@ -9,11 +9,11 @@ module.exports = (api) => {
   const shouldOutputCommonJS = /^test|commonjs$/.test(api.env());
 
   const presets = [
-    [`@babel/react`, { useSpread: true, runtime: `automatic`, importSource: `@emotion/react` }],
+    [`@babel/preset-react`, { useSpread: true, runtime: `automatic`, importSource: `@emotion/react` }],
     [`@babel/preset-typescript`, { onlyRemoveTypeImports: true }],
   ];
 
-  const plugins = [`macros`, `@emotion/babel-plugin`, `@babel/transform-runtime`, `babel-plugin-transform-import-meta`];
+  const plugins = [`macros`, `@emotion`, `@babel/transform-runtime`, `babel-plugin-transform-import-meta`];
 
   if (api.env() === `development`) {
     plugins.push(`react-refresh/babel`);

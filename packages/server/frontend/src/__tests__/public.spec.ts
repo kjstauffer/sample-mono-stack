@@ -1,23 +1,19 @@
 import { jest } from '@jest/globals';
 import config from 'config';
 import supertest, { type Response as SuperAgentResponse } from 'supertest';
-import type { User } from '@prisma/client';
 import type { Callback, RedisKey } from 'ioredis';
 import type { Logger } from 'winston';
 
 import { app } from '../apps/public.js';
 import { createTestUser } from '../model/mysql/testing/user.js';
-import { mockData } from '../testing/mockData.js';
-import { apiCookieName, getQualifiedSessionId } from '../utils/session.js';
-import { getAuthenticatedUserQuery } from '../graphql/public/User/__tests__/gql.js';
-import type { Response } from '../testing/types.js';
+import { getQualifiedSessionId } from '../utils/session.js';
 import { redis } from '../utils/redis.js';
 import { logger } from '../utils/logger.js';
 import prisma from '../model/prisma.js';
+import { mockPassword } from '../testing/mockData.js';
 
 const SESSION_ID = `TEST_SESSION_ID`;
 const REDIS_SESSION_ID = getQualifiedSessionId(SESSION_ID);
-const EXPIRY_TIME_IN_MS = 10000;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -68,17 +64,6 @@ const authenticateUserPostNoOrigin = ({
   variables: { username: string; password: string };
 }) => supertest.agent(app).post(`/auth`).set(`Accept`, `application/json`).send(variables);
 
-/**
- * Set an authenticated user cookie and call the `getAuthenticatedUserQuery` graphql resolver.
- */
-const getAuthenticatedUserPost = () =>
-  supertest
-    .agent(app)
-    .post(`/`)
-    .set(`Origin`, config.get<string>(`domain`))
-    .set(`cookie`, `${apiCookieName}=${SESSION_ID}; Path=/; HttpOnly; Secure; SameSite=None`)
-    .send({ query: getAuthenticatedUserQuery });
-
 describe(`Error Tests`, () => {
   test(`Authenticate with an empty user`, async () => {
     await authenticateUserPost({
@@ -89,7 +74,9 @@ describe(`Error Tests`, () => {
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
@@ -110,7 +97,9 @@ describe(`Error Tests`, () => {
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
@@ -123,7 +112,9 @@ describe(`Error Tests`, () => {
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
@@ -136,90 +127,31 @@ describe(`Error Tests`, () => {
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
   test(`Authenticate a known user w/bad password`, async () => {
-    await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
+    const newUser = await createTestUser();
 
     await authenticateUserPost({
       variables: {
-        username: `validUser`,
+        username: newUser.username,
         password: `badPassword`,
       },
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
-      });
-  });
-
-  test(`Get authenticated user with an invalid session User ID`, async () => {
-    await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
-
-    /* Set a mocked session. */
-    await redis.set(
-      REDIS_SESSION_ID,
-      `invalid_user_id`,
-      `EX`,
-      Math.round((Date.now() + EXPIRY_TIME_IN_MS) / 1000),
-    );
-
-    await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
-      expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/notAllowed/);
-    });
-  });
-
-  test(`Get authenticated user with a missing session`, async () => {
-    await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
-      expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/notAllowed/);
-    });
-  });
-
-  test(`Get authenticated user with a missing user ID in session`, async () => {
-    /** Set a mocked session with an invalid value. */
-    await redis.set(
-      REDIS_SESSION_ID,
-      ``,
-      `EX`,
-      Math.round((Date.now() + EXPIRY_TIME_IN_MS) / 1000),
-    );
-
-    await getAuthenticatedUserPost().then(({ body: { errors } }: Response) => {
-      expect(errors).toBeDefined();
-      expect(errors[0].message).toMatch(/notAllowed/);
-    });
-  });
-
-  test(`GraphQL Codegen: Get authenticated user with an invalid key`, async () => {
-    const getGQLPost = () =>
-      supertest.agent(app).post(`/`).send({ query: getAuthenticatedUserQuery });
-
-    await getGQLPost()
-      .set(`gql-codegen-key`, `invalid-key`)
-      .then(({ body: { errors } }: Response) => {
-        expect(errors).toHaveLength(1);
-        expect(errors[0].message).toMatch(/notAllowed/);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
   test(`Authenticate a known user w/valid credentials w/maximum sessionId collisions`, async () => {
-    const user = await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
+    const newUser = await createTestUser();
 
     /**
      * The following ensures that every check, to see if the session already exists, will be `true`.
@@ -228,27 +160,25 @@ describe(`Error Tests`, () => {
     jest
       .spyOn(redis, `get`)
       .mockImplementation((_key: RedisKey, _cb: Callback<string | null> | undefined) => {
-        return Promise.resolve(JSON.stringify({ userId: user.id }));
+        return Promise.resolve(JSON.stringify({ userId: newUser.id }));
       });
 
     await authenticateUserPost({
       variables: {
-        username: `validUser`,
-        password: `validPassword`,
+        username: newUser.username,
+        password: mockPassword,
       },
     })
       .expect(401)
       .then(({ error }: SuperAgentResponse) => {
-        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(`Unauthorized`);
+        expect((error as Exclude<SuperAgentResponse[`error`], false>).text).toBe(
+          JSON.stringify({ error: `unauthorized` }),
+        );
       });
   });
 
   test(`Redis fails while authenticating a known user`, async () => {
-    await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
+    const newUser = await createTestUser();
 
     /**
      * The following ensures that every check, to see if the session already exists, will be `true`.
@@ -273,11 +203,11 @@ describe(`Error Tests`, () => {
       return logger;
     });
 
-    /* Assert any non-XHR request returns an error (non-JSON). */
+    /* Assert any non-XHR request returns an error. */
     await authenticateUserPost({
       variables: {
-        username: `validUser`,
-        password: `validPassword`,
+        username: newUser.username,
+        password: mockPassword,
       },
     })
       .expect(500)
@@ -289,11 +219,7 @@ describe(`Error Tests`, () => {
   });
 
   test(`Authentication exception using XHR`, async () => {
-    await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
+    const newUser = await createTestUser();
 
     /* Mock the `findFirst` query method, ensuring it fails so Express can handle the error */
     jest.spyOn(prisma.user, `findFirst`).mockImplementationOnce(() => {
@@ -303,8 +229,8 @@ describe(`Error Tests`, () => {
     /* Assert an XHR request returns a JSON string. */
     await authenticateUserPostXhr({
       variables: {
-        username: `validUser`,
-        password: `validPassword`,
+        username: newUser.username,
+        password: mockPassword,
       },
     })
       .expect(500)
@@ -318,74 +244,20 @@ describe(`Error Tests`, () => {
 
 describe(`Success Tests`, () => {
   test(`Authenticate a known user w/valid credentials`, async () => {
-    await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
+    const newUser = await createTestUser();
 
     await authenticateUserPost({
       variables: {
-        username: `validUser`,
-        password: `validPassword`,
+        username: newUser.username,
+        password: mockPassword,
       },
     })
       .expect(200)
-      .then(({ body: { ok } }: SuperAgentResponse) => {
-        expect(ok).toBe(true);
-      });
-  });
-
-  test(`Get authenticated user with a valid cookie/session`, async () => {
-    const assertUser = async (user: User) => {
-      /* Set a mocked session. */
-      await redis.set(
-        REDIS_SESSION_ID,
-        JSON.stringify({ userId: user.id }),
-        `EX`,
-        Math.round((Date.now() + EXPIRY_TIME_IN_MS) / 1000),
-      );
-
-      const name = user.name ?? ``;
-
-      await getAuthenticatedUserPost().then(({ body: { data, errors } }: Response) => {
-        expect(errors).toBeUndefined();
-        expect(data.getAuthenticatedUser.user.id).toBe(`${user.id}`);
-        expect(data.getAuthenticatedUser.user.name).toBe(name);
-      });
-    };
-
-    const user = await createTestUser({
-      username: `validUser`,
-      password: `validPassword`,
-      email: `validUser@${mockData.domain}`,
-    });
-
-    await assertUser(user);
-
-    const user2 = await createTestUser({
-      username: `validUser2`,
-      password: `validPassword2`,
-      email: `validUser2@${mockData.domain}`,
-      name: null,
-    });
-
-    await assertUser(user2);
-  });
-
-  test(`GraphQL Codegen: Get authenticated user with a valid key`, async () => {
-    const getGQLPost = () =>
-      supertest.agent(app).post(`/`).send({ query: getAuthenticatedUserQuery });
-
-    const gqlCodegenKey = config.get<string>(`gqlCodegenKey`);
-
-    await getGQLPost()
-      .set(`gql-codegen-key`, gqlCodegenKey)
-      .expect(200)
-      .then(({ body: { data, errors } }: Response) => {
-        expect(errors).toBeUndefined();
-        expect(data.getAuthenticatedUser.user).toHaveProperty(`id`);
-        expect(data.getAuthenticatedUser.user).toHaveProperty(`name`);
+      .then(({ body: { user } }: SuperAgentResponse) => {
+        expect(user).toMatchObject({
+          id: newUser.id,
+          name: newUser.name,
+        });
       });
   });
 });

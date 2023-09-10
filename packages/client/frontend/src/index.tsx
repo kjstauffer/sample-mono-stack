@@ -14,6 +14,7 @@ import { App } from './App';
 import { RootErrorBoundary } from './RootErrorBoundary';
 import { apolloApiClient } from './apollo/apiClient';
 import { BaselineStyle } from './StyleWrapper';
+import { AppContextProvider } from './AppContext';
 
 export const muiCache = createCache({
   key: `mui`,
@@ -40,7 +41,9 @@ if (container) {
             <BrowserRouter>
               <CacheProvider value={muiCache}>
                 <BaselineStyle>
-                  <App />
+                  <AppContextProvider>
+                    <App />
+                  </AppContextProvider>
                 </BaselineStyle>
               </CacheProvider>
             </BrowserRouter>

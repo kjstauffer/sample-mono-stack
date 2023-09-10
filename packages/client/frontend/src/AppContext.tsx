@@ -1,57 +1,83 @@
 import React from 'react';
-// import type { Draft } from 'immer';
-// import { useImmerReducer } from 'use-immer';
+import type { Draft } from 'immer';
+import { useImmerReducer } from 'use-immer';
 
-import type { User } from './graphql/generatedComponents';
+import { onError } from './apollo/errorHandling';
+import { useGetAuthenticatedUserQuery, type User } from './graphql/generatedComponents';
+
+/**
+ * A context that wraps the entire application to provide application-wide state.
+ * Useful for tracking an authenticated user and providing that user data downstream.
+ */
 
 type State = {
+  /** The authenticated user */
   user?: User;
+
+  /** `true` if the application finished loading */
+  didFinishLoading: boolean;
+
+  /** Contains an error message if authentication failed. */
+  error?: string;
 };
 
 /**
  * All the actions that can be dispatched throughout the app to update state.
  */
-// type Action = { type: `SET_AUTHENTICATED`; user: User };
+type Action =
+  | { type: `SET_AUTHENTICATED_USER`; user: State[`user`] }
+  | { type: `SET_AUTHENTICATION_ERROR`; error: State[`error`] };
 
-/**
- * Uncomment when a reducer is needed to perform state updates.
- */
-// const reducer = (_draft: Draft<State>, _action: Action) => {
-// switch (action.type) {
-//   case `SET_AUTHENTICATED`:
-//     draft.user = action.user;
-//     break;
-// /* no default */
-// }
-// };
+const reducer = (draft: Draft<State>, action: Action) => {
+  switch (action.type) {
+    case `SET_AUTHENTICATED_USER`:
+      draft.user = action.user;
+      draft.didFinishLoading = true;
+      break;
+
+    case `SET_AUTHENTICATION_ERROR`:
+      draft.error = action.error;
+      draft.didFinishLoading = true;
+      break;
+
+    /* no default */
+  }
+};
 
 type Context = State & {
-  /**
-   * Uncomment when using a reducer in order to provide a dispatch function for state updates.
-   */
-  // dispatch: React.Dispatch<Action>;
+  isLoading: boolean;
+  dispatch: React.Dispatch<Action>;
 };
 
 const AppContext = React.createContext({} as Context);
 
-type Props = {
-  user?: User;
-};
+const AppContextProvider = ({ children }: React.PropsWithChildren) => {
+  const [state, dispatch] = useImmerReducer(reducer, {
+    user: undefined,
+  } as State);
 
-const AppContextProvider = ({ children, user }: React.PropsWithChildren<Props>) => {
   /**
-   * Uncomment when a reducer is needed to perform state updates.
+   * Check if a user already has already been authenticated and has a session.
+   * If so, automatically set the user as authenticated.
    */
-  // const [state, dispatch] = useImmerReducer(reducer, {
-  //   user,
-  // } as State);
+  const { loading: isLoading } = useGetAuthenticatedUserQuery({
+    fetchPolicy: `network-only`,
+    onError(error) {
+      onError(error);
+      dispatch({ type: `SET_AUTHENTICATION_ERROR`, error: error.message });
+    },
+    onCompleted(data) {
+      dispatch({ type: `SET_AUTHENTICATED_USER`, user: data.getAuthenticatedUser.user });
+    },
+  });
 
   const context = React.useMemo(
     () => ({
-      user,
-      // dispatch,
+      ...state,
+      isLoading,
+      dispatch,
     }),
-    [user],
+    [dispatch, isLoading, state],
   );
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

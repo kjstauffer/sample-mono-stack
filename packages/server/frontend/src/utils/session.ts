@@ -1,5 +1,4 @@
 import config from 'config';
-
 import type { User } from '@prisma/client';
 
 import type { RequestCookies } from '../types.js';

@@ -112,7 +112,7 @@ const authRoute = async (req: Request, res: Response) => {
   const user = await authenticateUser({ username, password });
 
   if (!user) {
-    res.status(401).send(`Unauthorized`);
+    res.status(401).send({ error: `unauthorized` });
     return;
   }
 
@@ -122,12 +122,13 @@ const authRoute = async (req: Request, res: Response) => {
     const sessionId = await setSession({ user });
 
     if (!sessionId) {
-      res.status(401).send(`Unauthorized`);
+      res.status(401).send({ error: `unauthorized` });
       return;
     }
 
     /* Set the cookie. */
     res.cookie(apiCookieName, sessionId, {
+      domain: `${config.get<string>(`domain`)}`,
       secure: true,
       httpOnly: true,
       sameSite: `none`,
@@ -135,7 +136,12 @@ const authRoute = async (req: Request, res: Response) => {
     });
   }
 
-  res.status(200).send({ ok: true });
+  res.status(200).send({
+    user: {
+      id: user.id,
+      name: user.name,
+    },
+  });
 };
 
 /**
@@ -200,6 +206,7 @@ app.use(express.json({ limit: `50mb` }));
 app.use(express.urlencoded({ limit: `50mb`, extended: true }));
 
 app.post(`/auth`, asyncRoute(authRoute));
+
 app.use(handleAuthErrors);
 
 // const errorPlugin: ApolloServerPlugin = {

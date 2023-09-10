@@ -50,16 +50,25 @@ const getUnauthenticatedUserMock = () => {
 /**
  * Mock 'fetch' to intercept the call and return data for testing.
  */
-// export const mockFetch = (data: ApiResponse, reject?: boolean) =>
-//   jest.fn().mockImplementation(() => {
-//     if (reject) {
-//       return Promise.reject(`Reject`);
-//     }
+type MockFetchOptions<T> = {
+  data: T;
+  ok?: boolean;
+  reject?: boolean;
+  rejectJson?: boolean;
+};
+export const mockFetch = <T>({ data, ok = true, reject, rejectJson }: MockFetchOptions<T>) =>
+  jest.fn().mockImplementation(() => {
+    if (reject) {
+      return Promise.reject({
+        ok: false,
+        json: () => (rejectJson ? Promise.reject(data) : Promise.resolve(data)),
+      });
+    }
 
-//     return Promise.resolve({
-//       ok: true,
-//       json: () => Promise.resolve(data),
-//     });
-//   });
+    return Promise.resolve({
+      ok,
+      json: () => (rejectJson ? Promise.reject(data) : Promise.resolve(data)),
+    });
+  });
 
 export { getAuthenticatedUserMock, getUnauthenticatedUserMock, getMockUser };
