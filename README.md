@@ -5,7 +5,6 @@ This repo contains a sample setup, including authentication, for a monolith stac
 ## Notes
 
 - This document is still a work-in-progress and may be missing things.
-- As of 2023-08-20, The frontend piece `client-frontend` is under development and is not apart of the repo yet.
 
 ## Stack/Tools
 
@@ -18,6 +17,8 @@ Below is a list of technology used:
 - [Express](http://expressjs.com/) - API routing (used to set up the GraphQL endpoint and a single REST authentication endpoint).
 - [MySQL](https://www.mysql.com) - The database.
 - [Prisma](https://www.prisma.io/) - The database ORM.
+- [Emotion](https://emotion.sh) - CSS-in-JS
+- [Zod](https://zod.dev/) - Validation
 - [Docker](https://www.docker.com/) - Runs various services inside a container.
 - [ioredis](https://github.com/redis/ioredis) - Used for caching and sessions.
 - [ts-node](https://github.com/TypeStrong/ts-node) - Execute typescript.
